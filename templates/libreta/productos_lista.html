@@ -1,0 +1,45 @@
+{% extends "base_app.html" %}
+{% load pesos %}
+{% block titulo %}Productos{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><h1>Productos</h1><p>Tu catálogo con precios. Al fiar los escoges y el total se calcula solo.</p></div>
+  <div class="botones"><a href="{% url 'libreta:producto_nuevo' %}" class="boton boton--principal">{% include "includes/icono.html" with nombre="mas" %}Nuevo producto</a></div>
+</div>
+<section class="tarjeta">
+  <div class="barra-filtros">
+    <span class="suave">{{ pagina.paginator.count }} producto{{ pagina.paginator.count|pluralize }}</span>
+    <form class="buscador" method="get" role="search">
+      <label for="q" class="oculto-visual">Buscar producto</label>
+      <input type="search" id="q" name="q" value="{{ q }}" placeholder="Buscar producto">
+      <button class="boton boton--quieto boton--chico" type="submit">Buscar</button>
+    </form>
+  </div>
+  {% if pagina.object_list %}
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead><tr><th>Producto</th><th class="derecha">Precio</th><th>Estado</th><th class="derecha">Acciones</th></tr></thead>
+      <tbody>
+      {% for p in pagina %}
+        <tr>
+          <td><strong>{{ p.nombre }}</strong></td>
+          <td class="derecha monto">{{ p.precio|pesos }}</td>
+          <td>{% if p.activo %}<span class="etiqueta etiqueta--ok">Activo</span>{% else %}<span class="etiqueta etiqueta--neutro">Inactivo</span>{% endif %}</td>
+          <td class="derecha nowrap">
+            <a href="{% url 'libreta:producto_editar' p.pk %}" class="boton boton--quieto boton--chico">Editar</a>
+            <a href="{% url 'libreta:producto_eliminar' p.pk %}" class="boton boton--peligro boton--chico">Eliminar</a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "includes/paginacion.html" %}
+  {% else %}
+  <div class="vacio">
+    {% if q %}<p class="vacio__nota">No encontramos «{{ q }}»</p><p><a href="{% url 'libreta:productos' %}">Ver todos los productos</a></p>
+    {% else %}<p class="vacio__nota">Sin productos todavía</p><p>Agrega lo que más fías: arroz, aceite, huevos, pan…</p><a href="{% url 'libreta:producto_nuevo' %}" class="boton boton--principal">Agregar producto</a>{% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

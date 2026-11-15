@@ -1,0 +1,93 @@
+{% extends "base_app.html" %}
+{% load pesos %}
+{% block titulo %}{{ cliente.nombre }}{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <p class="migas"><a href="{% url 'libreta:clientes' %}">Clientes</a> / {{ cliente.nombre }}</p>
+    <div class="persona">
+      <span class="inicial" aria-hidden="true">{{ cliente.nombre|first }}</span>
+      <div>
+        <h1>{{ cliente.nombre }} {% if not cliente.activo %}<span class="etiqueta etiqueta--neutro">Archivado</span>{% endif %}</h1>
+        <p class="datos-linea"><span>C.C. {{ cliente.cedula }}</span><span>Tel. {{ cliente.telefono }}</span>{% if cliente.direccion %}<span>{{ cliente.direccion }}</span>{% endif %}</p>
+      </div>
+    </div>
+  </div>
+  <div class="botones">
+    <a href="{% url 'libreta:cliente_editar' cliente.pk %}" class="boton boton--quieto">{% include "includes/icono.html" with nombre="editar" %}Editar</a>
+    {% if cliente.saldo > 0 %}<a href="{% url 'libreta:abono_nuevo' %}?cliente={{ cliente.pk }}" class="boton">{% include "includes/icono.html" with nombre="abonos" %}Abono</a>{% endif %}
+    {% if cliente.activo %}<a href="{% url 'libreta:fiado_nuevo' %}?cliente={{ cliente.pk }}" class="boton boton--principal">{% include "includes/icono.html" with nombre="mas" %}Fiar</a>{% endif %}
+  </div>
+</div>
+
+<div class="cifras cifras--3">
+  <div class="cifra cifra--destacada"><p class="cifra__etiqueta">Saldo actual</p><p class="cifra__valor">{{ cliente.saldo|pesos }}</p><p class="cifra__nota">{{ cliente.total_fiado|pesos }} fiado menos {{ cliente.total_abonado|pesos }} abonado</p></div>
+  <div class="cifra">
+    <p class="cifra__etiqueta">Límite de crédito</p><p class="cifra__valor">{{ cliente.limite_credito|pesos }}</p>
+    <div class="barra{% if cliente.estado.1 == 'mal' %} barra--mal{% elif cliente.estado.1 == 'aviso' %} barra--aviso{% endif %}"><span style="width: {{ cliente.porcentaje_usado }}%"></span></div>
+    <p class="cifra__nota">Usado el {{ cliente.porcentaje_usado }}%, disponible {{ cliente.disponible|pesos }}</p>
+  </div>
+  <div class="cifra">
+    <p class="cifra__etiqueta">Último abono</p>
+    {% if ultimo_abono_obj %}<p class="cifra__valor">{{ ultimo_abono_obj.valor|pesos }}</p><p class="cifra__nota">{{ ultimo_abono_obj.fecha|date:"j \d\e F"|lower }}, {{ ultimo_abono_obj.get_metodo_display }}</p>
+    {% else %}<p class="cifra__valor">—</p><p class="cifra__nota">Todavía no ha abonado</p>{% endif %}
+  </div>
+</div>
+
+<div class="columna-lateral">
+  <section class="tarjeta">
+    <div class="barra-filtros">
+      <h2>Movimientos <span class="etiqueta etiqueta--{{ cliente.estado.1 }}">{{ cliente.estado.0 }}</span></h2>
+      <nav class="chips" aria-label="Filtrar movimientos">
+        <a class="chip" href="?tipo=todos" {% if tipo == "todos" %}aria-current="true"{% endif %}>Todos</a>
+        <a class="chip" href="?tipo=fiado" {% if tipo == "fiado" %}aria-current="true"{% endif %}>Fiados</a>
+        <a class="chip" href="?tipo=abono" {% if tipo == "abono" %}aria-current="true"{% endif %}>Abonos</a>
+      </nav>
+    </div>
+    {% if movimientos %}
+    <div class="tabla-envoltura">
+      <table class="tabla">
+        <thead><tr><th>Fecha</th><th>Tipo</th><th class="ocultar-movil">Detalle</th><th class="derecha">Valor</th><th class="derecha">Saldo</th><th class="ocultar-movil"></th></tr></thead>
+        <tbody>
+        {% for m in movimientos %}
+          <tr>
+            <td class="nowrap">{{ m.fecha|date:"d/m/Y" }}<small>{{ m.fecha|date:"g:i a" }}</small></td>
+            <td><span class="etiqueta etiqueta--{{ m.tipo }}">{{ m.tipo|capfirst }}</span></td>
+            <td class="ocultar-movil">{% if m.tipo == "fiado" %}<a class="fila-enlace" style="font-weight:500" href="{% url 'libreta:fiado_detalle' m.obj.pk %}" title="{{ m.detalle }}">{{ m.detalle|default:"Ver detalle"|truncatechars:55 }}</a>{% else %}{{ m.detalle }}{% endif %}</td>
+            <td class="derecha monto monto--{{ m.tipo }}">{% if m.tipo == "fiado" %}+{% else %}−{% endif %}{{ m.valor|pesos }}</td>
+            <td class="derecha monto">{{ m.saldo|pesos }}</td>
+            <td class="ocultar-movil derecha">{% if m.tipo == "abono" %}<a href="{% url 'libreta:abono_eliminar' m.obj.pk %}" class="suave" title="Eliminar abono" aria-label="Eliminar abono" style="display:inline-block;width:18px">{% include "includes/icono.html" with nombre="eliminar" %}</a>{% endif %}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="vacio"><p class="vacio__nota">Sin movimientos</p><p>Cuando le fíes o te abone, quedará anotado aquí.</p></div>
+    {% endif %}
+  </section>
+
+  <aside class="tarjeta">
+    <div class="tarjeta__cabeza"><h2>Compartir estado de cuenta</h2></div>
+    <div class="tarjeta__cuerpo compartir">
+      <img class="qr" src="{% url 'libreta:cliente_qr' cliente.pk %}" alt="Código QR para que {{ cliente.nombre }} consulte su cuenta">
+      <p class="codigo-grande" title="Código de consulta">{{ cliente.codigo_acceso }}</p>
+      <div class="enlace-copiar">
+        <input type="text" value="{{ url_consulta }}" readonly aria-label="Enlace de consulta" id="enlace-consulta">
+        <button type="button" data-copiar="#enlace-consulta">Copiar</button>
+      </div>
+      <a href="{{ enlace_whatsapp }}" target="_blank" rel="noopener" class="boton boton--whatsapp">{% include "includes/icono.html" with nombre="whatsapp" %}Enviar recordatorio</a>
+      <p class="burbuja">{{ mensaje_whatsapp }}</p>
+      <p class="suave" style="font-size:.82rem">El cliente entra con el enlace o el QR y los últimos 4 dígitos de su cédula.</p>
+      <div class="botones">
+        <a href="{% url 'libreta:cliente_qr' cliente.pk %}?descargar=1" class="boton boton--quieto boton--chico">{% include "includes/icono.html" with nombre="descargar" %}Descargar QR</a>
+        <form method="post" action="{% url 'libreta:cliente_regenerar_codigo' cliente.pk %}" data-confirmar="El enlace y el QR actuales dejarán de funcionar. ¿Generar un código nuevo?">
+          {% csrf_token %}
+          <button type="submit" class="boton boton--quieto boton--chico">{% include "includes/icono.html" with nombre="refrescar" %}Nuevo código</button>
+        </form>
+      </div>
+    </div>
+  </aside>
+</div>
+<p><a href="{% url 'libreta:cliente_eliminar' cliente.pk %}" class="suave" style="font-size:.88rem">Eliminar este cliente</a></p>
+{% endblock %}

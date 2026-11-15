@@ -1,0 +1,26 @@
+{% extends "base_app.html" %}
+{% block titulo %}Registrar abono{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><p class="migas"><a href="{% url 'libreta:abonos' %}">Abonos</a> / Nuevo</p><h1>Registrar abono</h1><p>El abono puede ser parcial o total. El saldo del cliente se actualiza solo.</p></div>
+</div>
+<form method="post" class="tarjeta tarjeta__cuerpo" style="max-width: 640px; display:flex; flex-direction:column; gap:1.1rem" id="form-abono" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}<ul class="errores-form">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  {% include "includes/campo.html" with campo=form.cliente %}
+  <div class="vista-previa" data-saldo-cliente>Escoge un cliente para ver cuánto debe.</div>
+  <div class="rejilla-form">
+    <div>
+      {% include "includes/campo.html" with campo=form.valor %}
+      <button type="button" class="enlace-boton" style="font-size:.86rem;margin-top:.35rem" data-pagar-todo hidden>Paga todo lo que debe</button>
+    </div>
+    {% include "includes/campo.html" with campo=form.metodo %}
+  </div>
+  {% include "includes/campo.html" with campo=form.nota %}
+  <div class="acciones-form">
+    <button type="submit" class="boton boton--principal">Guardar abono</button>
+    <a href="{% url 'libreta:abonos' %}" class="boton boton--quieto">Cancelar</a>
+  </div>
+</form>
+{{ datos_clientes|json_script:"datos-clientes" }}
+{% endblock %}

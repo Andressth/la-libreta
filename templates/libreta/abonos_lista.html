@@ -1,0 +1,44 @@
+{% extends "base_app.html" %}
+{% load pesos %}
+{% block titulo %}Abonos{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><h1>Abonos</h1><p>Los pagos que te han hecho tus clientes.</p></div>
+  <div class="botones"><a href="{% url 'libreta:abono_nuevo' %}" class="boton boton--principal">{% include "includes/icono.html" with nombre="mas" %}Registrar abono</a></div>
+</div>
+<section class="tarjeta">
+  <div class="barra-filtros">
+    <nav class="chips" aria-label="Filtrar por método">
+      <a class="chip" href="?{% if q %}q={{ q|urlencode }}{% endif %}" {% if not metodo %}aria-current="true"{% endif %}>Todos</a>
+      {% for valor, texto in metodos %}<a class="chip" href="?metodo={{ valor }}{% if q %}&q={{ q|urlencode }}{% endif %}" {% if metodo == valor %}aria-current="true"{% endif %}>{{ texto }}</a>{% endfor %}
+    </nav>
+    <form class="buscador" method="get" role="search">
+      <input type="hidden" name="metodo" value="{{ metodo }}">
+      <label for="q" class="oculto-visual">Buscar por cliente</label>
+      <input type="search" id="q" name="q" value="{{ q }}" placeholder="Buscar por cliente">
+      <button class="boton boton--quieto boton--chico" type="submit">Buscar</button>
+    </form>
+  </div>
+  {% if pagina.object_list %}
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead><tr><th>Fecha</th><th>Cliente</th><th>Método</th><th class="derecha">Valor</th><th class="derecha ocultar-movil"></th></tr></thead>
+      <tbody>
+      {% for a in pagina %}
+        <tr>
+          <td class="nowrap">{{ a.fecha|date:"d/m/Y" }}<small>{{ a.fecha|date:"g:i a" }}</small></td>
+          <td><a class="fila-enlace" href="{{ a.cliente.get_absolute_url }}">{{ a.cliente.nombre }}</a>{% if a.nota %}<small>{{ a.nota }}</small>{% endif %}</td>
+          <td>{{ a.get_metodo_display }}</td>
+          <td class="derecha monto monto--abono">{{ a.valor|pesos }}</td>
+          <td class="derecha ocultar-movil"><a href="{% url 'libreta:abono_eliminar' a.pk %}" class="suave" style="font-size:.85rem">Eliminar</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "includes/paginacion.html" %}
+  {% else %}
+  <div class="vacio"><p class="vacio__nota">{% if q or metodo %}Sin resultados{% else %}Todavía no hay abonos{% endif %}</p><p>Cuando un cliente te pague, regístralo aquí y su saldo baja solo.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

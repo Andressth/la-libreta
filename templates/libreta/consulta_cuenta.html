@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load pesos %}
+{% block titulo %}Mi cuenta en {{ tienda.nombre }}{% endblock %}
+{% block cuerpo %}
+<main class="cliente-vista">
+  <header class="cliente-vista__cabeza">
+    <p class="tienda-nombre">{{ tienda.nombre }}</p>
+    <small>{{ tienda.direccion }}, {{ tienda.municipio }}. Tel. {{ tienda.telefono }}</small>
+  </header>
+  <div class="cliente-vista__cuerpo">
+    <section class="saldo-hoja">
+      <p style="font-weight:600">Hola, {{ cliente.nombre.split.0 }}</p>
+      {% if cliente.saldo > 0 %}
+        <p class="suave" style="margin-top:.6rem">Tu saldo pendiente</p>
+        <p class="saldo-hoja__valor">{{ cliente.saldo|pesos }}</p>
+        <div class="barra{% if cliente.estado.1 == 'mal' %} barra--mal{% elif cliente.estado.1 == 'aviso' %} barra--aviso{% endif %}"><span style="width: {{ cliente.porcentaje_usado }}%"></span></div>
+        <p class="suave" style="font-size:.88rem;margin-top:.5rem">Límite de crédito: {{ cliente.limite_credito|pesos }}</p>
+      {% else %}
+        <p class="saldo-hoja__valor" style="font-family:var(--mano);font-size:2.4rem">¡Estás a paz y salvo!</p>
+        <p class="suave">No tienes saldo pendiente en esta tienda.</p>
+      {% endif %}
+      {% if ultimo_abono_obj %}<p class="suave" style="font-size:.88rem;margin-top:.3rem">Último abono: {{ ultimo_abono_obj.valor|pesos }} el {{ ultimo_abono_obj.fecha|date:"j \d\e F"|lower }}</p>{% endif %}
+    </section>
+
+    <section class="tarjeta">
+      <div class="tarjeta__cabeza"><h2>Tus movimientos</h2></div>
+      {% if movimientos %}
+      <ul class="movs">
+        {% for m in movimientos %}
+        <li>
+          <div>{{ m.tipo|capfirst }}<small>{{ m.fecha|date:"j M Y" }}{% if m.detalle %}, {{ m.detalle|truncatechars:40 }}{% endif %}</small></div>
+          <span class="monto monto--{{ m.tipo }}">{% if m.tipo == "fiado" %}+{% else %}−{% endif %}{{ m.valor|pesos }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% if hay_mas %}<p class="tarjeta__cuerpo" style="border-top:1px solid var(--borde);padding:.8rem 1.2rem"><a href="?todo=1">Ver todo el historial</a></p>{% endif %}
+      {% else %}
+      <div class="vacio"><p>Todavía no tienes movimientos.</p></div>
+      {% endif %}
+    </section>
+
+    <p class="nota-pie">Esta información la registra la tienda. Si ves un error, habla con el tendero.</p>
+    <form method="post" action="{% url 'libreta:consulta_salir' cliente.codigo_acceso %}" class="nota-pie">
+      {% csrf_token %}<button type="submit" class="enlace-boton">Salir</button>
+    </form>
+  </div>
+</main>
+{% endblock %}

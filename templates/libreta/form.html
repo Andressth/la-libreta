@@ -1,0 +1,20 @@
+{% extends "base_app.html" %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><p class="migas"><a href="{{ volver }}">Volver</a></p><h1>{{ titulo }}</h1>{% if subtitulo %}<p>{{ subtitulo }}</p>{% endif %}</div>
+</div>
+<form method="post" class="tarjeta tarjeta__cuerpo" style="max-width: 760px" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}<ul class="errores-form" style="margin-bottom:1rem">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+  <div class="rejilla-form">
+    {% for campo in form %}
+      {% if campo.widget_type == "checkbox" %}{% include "includes/campo.html" with ancho=True %}{% else %}{% include "includes/campo.html" %}{% endif %}
+    {% endfor %}
+  </div>
+  <div class="acciones-form" style="margin-top:1.4rem">
+    <button type="submit" class="boton boton--principal">Guardar</button>
+    <a href="{{ volver }}" class="boton boton--quieto">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

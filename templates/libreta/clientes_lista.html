@@ -1,0 +1,59 @@
+{% extends "base_app.html" %}
+{% load pesos %}
+{% block titulo %}Clientes{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><h1>Clientes</h1><p>Las personas a las que les fías y cuánto debe cada una.</p></div>
+  <div class="botones"><a href="{% url 'libreta:cliente_nuevo' %}" class="boton boton--principal">{% include "includes/icono.html" with nombre="mas" %}Nuevo cliente</a></div>
+</div>
+
+<section class="tarjeta">
+  <div class="barra-filtros">
+    <nav class="chips" aria-label="Filtrar clientes">
+      {% for clave, texto in filtros %}
+        <a class="chip" href="?filtro={{ clave }}{% if q %}&q={{ q|urlencode }}{% endif %}" {% if filtro == clave %}aria-current="true"{% endif %}>{{ texto }}</a>
+      {% endfor %}
+    </nav>
+    <form class="buscador" method="get" role="search">
+      <input type="hidden" name="filtro" value="{{ filtro }}">
+      <label for="q" class="oculto-visual">Buscar cliente</label>
+      <input type="search" id="q" name="q" value="{{ q }}" placeholder="Nombre, cédula o teléfono">
+      <button class="boton boton--quieto boton--chico" type="submit">Buscar</button>
+    </form>
+  </div>
+
+  {% if pagina.object_list %}
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead><tr>
+        <th>Cliente</th><th class="ocultar-movil">Teléfono</th>
+        <th class="derecha"><a href="?filtro={{ filtro }}&orden={% if orden == 'saldo' %}nombre{% else %}saldo{% endif %}{% if q %}&q={{ q|urlencode }}{% endif %}">Saldo {% if orden == 'saldo' %}↓{% endif %}</a></th>
+        <th class="ocultar-movil">Uso del límite</th><th class="ocultar-movil">Último abono</th><th>Estado</th>
+      </tr></thead>
+      <tbody>
+      {% for c in pagina %}
+        <tr>
+          <td><a class="fila-enlace" href="{{ c.get_absolute_url }}">{{ c.nombre }}</a><small>C.C. {{ c.cedula }}</small></td>
+          <td class="ocultar-movil">{{ c.telefono }}</td>
+          <td class="derecha monto">{{ c.saldo|pesos }}</td>
+          <td class="ocultar-movil nowrap">{{ c.porcentaje_usado }}% de {{ c.limite_credito|pesos }}<span class="mini-barra"><span style="width: {{ c.porcentaje_usado }}%"></span></span></td>
+          <td class="ocultar-movil">{{ c.ultimo_abono|date:"j M Y"|default:"Nunca" }}</td>
+          <td><span class="etiqueta etiqueta--{{ c.estado.1 }}">{{ c.estado.0 }}</span></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "includes/paginacion.html" %}
+  {% else %}
+  <div class="vacio">
+    {% if q or filtro != "todos" %}
+      <p class="vacio__nota">No hay clientes con ese filtro</p><p>Prueba con otro nombre o vuelve a <a href="{% url 'libreta:clientes' %}">todos los clientes</a>.</p>
+    {% else %}
+      <p class="vacio__nota">Tu libreta está en blanco</p><p>Registra a tu primer cliente con su límite de crédito.</p>
+      <a href="{% url 'libreta:cliente_nuevo' %}" class="boton boton--principal">Registrar cliente</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

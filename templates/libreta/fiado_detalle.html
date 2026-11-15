@@ -1,0 +1,30 @@
+{% extends "base_app.html" %}
+{% load pesos %}
+{% block titulo %}Fiado #{{ fiado.pk }}{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <p class="migas"><a href="{% url 'libreta:fiados' %}">Fiados</a> / #{{ fiado.pk }}</p>
+    <h1>Fiado de {{ fiado.total|pesos }}</h1>
+    <p>A <a href="{{ fiado.cliente.get_absolute_url }}">{{ fiado.cliente.nombre }}</a>, el {{ fiado.fecha|date:"j \d\e F \d\e Y"|lower }} a las {{ fiado.fecha|date:"g:i a" }}</p>
+  </div>
+  <div class="botones">
+    <a href="{% url 'libreta:fiado_eliminar' fiado.pk %}" class="boton boton--peligro">{% include "includes/icono.html" with nombre="eliminar" %}Eliminar</a>
+    <a href="{{ fiado.cliente.get_absolute_url }}" class="boton boton--principal">Ver cuenta del cliente</a>
+  </div>
+</div>
+<section class="tarjeta" style="max-width: 760px">
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead><tr><th>Descripción</th><th class="derecha">Cantidad</th><th class="derecha">Precio</th><th class="derecha">Subtotal</th></tr></thead>
+      <tbody>
+      {% for d in detalles %}
+        <tr><td>{{ d.descripcion }}{% if not d.producto %}<small>Valor libre</small>{% endif %}</td><td class="derecha">{{ d.cantidad }}</td><td class="derecha">{{ d.precio_unitario|pesos }}</td><td class="derecha monto">{{ d.subtotal|pesos }}</td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><td colspan="3" class="derecha"><strong>Total</strong></td><td class="derecha monto" style="font-size:1.1rem">{{ fiado.total|pesos }}</td></tr></tfoot>
+    </table>
+  </div>
+  {% if fiado.nota %}<p class="tarjeta__cuerpo suave" style="border-top:1px solid var(--borde)">Nota: {{ fiado.nota }}</p>{% endif %}
+</section>
+{% endblock %}

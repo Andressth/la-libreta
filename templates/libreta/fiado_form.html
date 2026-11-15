@@ -1,0 +1,46 @@
+{% extends "base_app.html" %}
+{% block titulo %}Nuevo fiado{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><p class="migas"><a href="{% url 'libreta:fiados' %}">Fiados</a> / Nuevo</p><h1>Nuevo fiado</h1><p>Escoge el cliente y lo que se lleva. El total y el nuevo saldo se calculan solos.</p></div>
+</div>
+
+<form method="post" class="columna-lateral" id="form-fiado" novalidate>
+  {% csrf_token %}
+  {{ formset.management_form }}
+  <section class="tarjeta tarjeta__cuerpo" style="display:flex;flex-direction:column;gap:1.1rem">
+    {% include "includes/campo.html" with campo=form.cliente %}
+    <div>
+      <p style="font-weight:600;font-size:.92rem;margin-bottom:.5rem">¿Qué se lleva?</p>
+      {% if formset.non_form_errors %}<ul class="errores-form" style="margin-bottom:.6rem">{% for e in formset.non_form_errors %}<li>{% if "at least" in e or "al menos" in e %}Agrega al menos un producto o un valor libre.{% else %}{{ e }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+      <div class="cabeza-detalle"><span>Producto</span><span>Descripción</span><span>Cant.</span><span>Precio</span><span style="text-align:right">Subtotal</span></div>
+      <div class="detalle-filas">
+        {% for f in formset %}
+        <div class="fila-detalle" data-fila>
+          {% for oculto in f.hidden_fields %}{{ oculto }}{% endfor %}
+          <div class="campo campo-producto{% if f.producto.errors %} campo--error{% endif %}"><label class="oculto-visual" for="{{ f.producto.id_for_label }}">Producto</label>{{ f.producto }}{% for e in f.producto.errors %}<span class="error-campo">{{ e }}</span>{% endfor %}</div>
+          <div class="campo campo-descripcion{% if f.descripcion.errors %} campo--error{% endif %}"><label class="oculto-visual" for="{{ f.descripcion.id_for_label }}">Descripción</label>{{ f.descripcion }}{% for e in f.descripcion.errors %}<span class="error-campo">{{ e }}</span>{% endfor %}</div>
+          <div class="campo{% if f.cantidad.errors %} campo--error{% endif %}"><label class="oculto-visual" for="{{ f.cantidad.id_for_label }}">Cantidad</label>{{ f.cantidad }}{% for e in f.cantidad.errors %}<span class="error-campo">{{ e }}</span>{% endfor %}</div>
+          <div class="campo{% if f.precio_unitario.errors %} campo--error{% endif %}"><label class="oculto-visual" for="{{ f.precio_unitario.id_for_label }}">Precio</label>{{ f.precio_unitario }}{% for e in f.precio_unitario.errors %}<span class="error-campo">{{ e }}</span>{% endfor %}</div>
+          <span class="subtotal" data-subtotal>$0</span>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" class="boton boton--quieto boton--chico" style="margin-top:.7rem" data-agregar-fila>{% include "includes/icono.html" with nombre="mas" %}Agregar otro producto</button>
+    </div>
+    {% include "includes/campo.html" with campo=form.nota %}
+  </section>
+
+  <aside class="tarjeta tarjeta__cuerpo" style="display:flex;flex-direction:column;gap:1rem;position:sticky;top:1rem">
+    <div class="total-fiado"><span>Total del fiado</span><strong data-total>$0</strong></div>
+    <div class="vista-previa" data-vista-previa>Escoge un cliente para ver cómo queda su saldo.</div>
+    {% if requiere_confirmacion or form.confirmar_limite.value %}
+      <div class="confirmacion">{% include "includes/campo.html" with campo=form.confirmar_limite %}</div>
+    {% endif %}
+    <button type="submit" class="boton boton--principal boton--ancho">Guardar fiado</button>
+    <a href="{% url 'libreta:fiados' %}" class="boton boton--quieto">Cancelar</a>
+  </aside>
+</form>
+{{ datos_clientes|json_script:"datos-clientes" }}
+{{ datos_productos|json_script:"datos-productos" }}
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base_app.html" %}
+{% load pesos %}
+{% block titulo %}Fiados{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><h1>Fiados</h1><p>Todas las compras a crédito de tu tienda, de la más reciente a la más antigua.</p></div>
+  <div class="botones"><a href="{% url 'libreta:fiado_nuevo' %}" class="boton boton--principal">{% include "includes/icono.html" with nombre="mas" %}Nuevo fiado</a></div>
+</div>
+<section class="tarjeta">
+  <div class="barra-filtros">
+    <span class="suave">{{ pagina.paginator.count }} fiado{{ pagina.paginator.count|pluralize }}</span>
+    <form class="buscador" method="get" role="search">
+      <label for="q" class="oculto-visual">Buscar por cliente</label>
+      <input type="search" id="q" name="q" value="{{ q }}" placeholder="Buscar por cliente">
+      <button class="boton boton--quieto boton--chico" type="submit">Buscar</button>
+    </form>
+  </div>
+  {% if pagina.object_list %}
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead><tr><th>Fecha</th><th>Cliente</th><th class="ocultar-movil">Productos</th><th class="derecha">Total</th></tr></thead>
+      <tbody>
+      {% for f in pagina %}
+        <tr>
+          <td class="nowrap">{{ f.fecha|date:"d/m/Y" }}<small>{{ f.fecha|date:"g:i a" }}</small></td>
+          <td><a class="fila-enlace" href="{{ f.cliente.get_absolute_url }}">{{ f.cliente.nombre }}</a></td>
+          <td class="ocultar-movil"><a href="{% url 'libreta:fiado_detalle' f.pk %}" style="color:inherit">{{ f.resumen|truncatechars:60 }}</a></td>
+          <td class="derecha"><a class="monto monto--fiado" style="text-decoration:none" href="{% url 'libreta:fiado_detalle' f.pk %}">{{ f.total|pesos }}</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "includes/paginacion.html" %}
+  {% else %}
+  <div class="vacio"><p class="vacio__nota">{% if q %}Sin resultados{% else %}Aún no has fiado nada{% endif %}</p><p>Los fiados que registres aparecerán aquí.</p><a href="{% url 'libreta:fiado_nuevo' %}" class="boton boton--principal">Registrar fiado</a></div>
+  {% endif %}
+</section>
+{% endblock %}

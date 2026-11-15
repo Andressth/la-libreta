@@ -1,0 +1,68 @@
+{% extends "base_app.html" %}
+{% load pesos %}
+{% block titulo %}Panel{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>Panel de resumen</h1>
+    <p>{{ hoy|date:"l, j \d\e F \d\e Y"|lower|capfirst }}</p>
+  </div>
+  <div class="botones">
+    <a href="{% url 'libreta:abono_nuevo' %}" class="boton">{% include "includes/icono.html" with nombre="abonos" %}Registrar abono</a>
+    <a href="{% url 'libreta:fiado_nuevo' %}" class="boton boton--principal">{% include "includes/icono.html" with nombre="mas" %}Nuevo fiado</a>
+  </div>
+</div>
+
+<div class="cifras">
+  <div class="cifra cifra--destacada"><p class="cifra__etiqueta">Total por cobrar</p><p class="cifra__valor">{{ total_por_cobrar|pesos }}</p><p class="cifra__nota">Suma de los saldos de tus clientes</p></div>
+  <a class="cifra" href="{% url 'libreta:clientes' %}?filtro=con_deuda" style="text-decoration:none;color:inherit"><p class="cifra__etiqueta">Clientes con deuda</p><p class="cifra__valor">{{ n_con_deuda }}</p><p class="cifra__nota">de {{ n_clientes }} clientes activos</p></a>
+  <a class="cifra" href="{% url 'libreta:abonos' %}" style="text-decoration:none;color:inherit"><p class="cifra__etiqueta">Abonos este mes</p><p class="cifra__valor">{{ abonos_mes_total|pesos }}</p><p class="cifra__nota">{{ abonos_mes_n }} abono{{ abonos_mes_n|pluralize }} registrado{{ abonos_mes_n|pluralize }}</p></a>
+  <a class="cifra{% if n_atrasados %} cifra--alerta{% endif %}" href="{% url 'libreta:clientes' %}?filtro=atrasados" style="text-decoration:none;color:inherit"><p class="cifra__etiqueta">Sin abonar hace +30 días</p><p class="cifra__valor">{{ n_atrasados }}</p><p class="cifra__nota">{% if n_atrasados %}Para enviarles un recordatorio{% else %}Todos están al día{% endif %}</p></a>
+</div>
+
+<div class="dos-columnas">
+  <section class="tarjeta">
+    <div class="tarjeta__cabeza"><h2>Clientes con mayor deuda</h2><a href="{% url 'libreta:clientes' %}?filtro=con_deuda&orden=saldo">Ver todos</a></div>
+    {% if mayores_deudas %}
+    <div class="tabla-envoltura">
+      <table class="tabla">
+        <thead><tr><th>Cliente</th><th class="derecha">Saldo</th><th class="derecha ocultar-movil">Límite</th><th class="ocultar-movil">Último abono</th><th>Estado</th></tr></thead>
+        <tbody>
+        {% for c in mayores_deudas %}
+          <tr>
+            <td><a class="fila-enlace" href="{{ c.get_absolute_url }}">{{ c.nombre }}</a></td>
+            <td class="derecha monto">{{ c.saldo|pesos }}</td>
+            <td class="derecha ocultar-movil">{{ c.limite_credito|pesos }}</td>
+            <td class="ocultar-movil">{{ c.ultimo_abono|date:"j M"|default:"Nunca" }}</td>
+            <td><span class="etiqueta etiqueta--{{ c.estado.1 }}">{{ c.estado.0 }}</span></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="vacio"><p class="vacio__nota">Nadie te debe nada</p><p>Cuando registres un fiado, aquí verás quién debe más.</p><a href="{% url 'libreta:cliente_nuevo' %}" class="boton">Registrar un cliente</a></div>
+    {% endif %}
+  </section>
+
+  <section class="tarjeta">
+    <div class="tarjeta__cabeza"><h2>Últimos movimientos</h2><a href="{% url 'libreta:fiados' %}">Ver fiados</a></div>
+    {% if recientes %}
+    <ul class="movs">
+      {% for m in recientes %}
+      <li>
+        <div>
+          {% if m.tipo == "fiado" %}<a href="{% url 'libreta:fiado_detalle' m.obj.pk %}">Fiado a {{ m.obj.cliente.nombre }}</a>
+          {% else %}<a href="{{ m.obj.cliente.get_absolute_url }}">Abono de {{ m.obj.cliente.nombre }}</a>{% endif %}
+          <small>{{ m.fecha|date:"j M, g:i a" }}{% if m.tipo == "abono" %}, {{ m.obj.get_metodo_display }}{% endif %}</small>
+        </div>
+        <span class="monto monto--{{ m.tipo }}">{% if m.tipo == "fiado" %}+{% else %}−{% endif %}{{ m.valor|pesos }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="vacio"><p>Aún no hay movimientos.</p></div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

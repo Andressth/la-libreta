@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Consulta tu cuenta{% endblock %}
+{% block cuerpo %}
+<main class="cliente-vista">
+  <header class="cliente-vista__cabeza">
+    <p class="tienda-nombre">{{ tienda.nombre }}</p>
+    <small>{{ tienda.direccion }}, {{ tienda.municipio }}</small>
+  </header>
+  <div class="cliente-vista__cuerpo">
+    <form method="post" class="saldo-hoja" style="display:flex;flex-direction:column;gap:1rem" novalidate>
+      {% csrf_token %}
+      <div>
+        <h1 style="font-size:1.35rem">Hola, {{ cliente.nombre.split.0 }}</h1>
+        <p class="suave">Para proteger tu información, escribe los últimos 4 dígitos de tu cédula.</p>
+      </div>
+      {% if bloqueado %}
+        <p class="mensaje mensaje--error">Hiciste demasiados intentos. Espera {{ minutos_bloqueo }} minutos y vuelve a intentarlo.</p>
+      {% else %}
+        {% include "includes/campo.html" with campo=form.pin %}
+        <button type="submit" class="boton boton--principal boton--ancho">Ver mi saldo</button>
+      {% endif %}
+    </form>
+    <p class="nota-pie">No necesitas crear una cuenta. Este enlace te lo compartió la tienda.</p>
+    <p class="nota-pie"><a href="{% url 'core:home' %}" class="marca" style="font-size:1rem;justify-content:center">{% include "includes/logo.html" %}La Libreta</a></p>
+  </div>
+</main>
+{% endblock %}
