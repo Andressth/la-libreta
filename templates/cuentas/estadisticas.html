@@ -1,0 +1,49 @@
+{% extends "base_app.html" %}
+{% load pesos %}
+{% block titulo %}Estadísticas generales{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>Estadísticas generales</h1>
+    <p>Resumen de todas las tiendas registradas en la plataforma.</p>
+  </div>
+  <div class="botones">
+    <a href="{% url 'admin:cuentas_usuario_changelist' %}" class="boton">{% include "includes/icono.html" with nombre="usuarios" %}Gestionar usuarios</a>
+    <a href="{% url 'admin:libreta_tienda_changelist' %}" class="boton boton--principal">{% include "includes/icono.html" with nombre="tienda" %}Gestionar tiendas</a>
+  </div>
+</div>
+
+<div class="cifras">
+  <div class="cifra"><p class="cifra__etiqueta">Tiendas registradas</p><p class="cifra__valor">{{ n_tiendas }}</p><p class="cifra__nota">{{ n_tenderos_activos }} tenderos activos{% if n_tenderos_inactivos %}, {{ n_tenderos_inactivos }} desactivados{% endif %}</p></div>
+  <div class="cifra"><p class="cifra__etiqueta">Clientes registrados</p><p class="cifra__valor">{{ n_clientes }}</p><p class="cifra__nota">entre todas las tiendas</p></div>
+  <div class="cifra"><p class="cifra__etiqueta">Movimientos</p><p class="cifra__valor">{{ n_fiados|add:n_abonos }}</p><p class="cifra__nota">{{ n_fiados }} fiados y {{ n_abonos }} abonos</p></div>
+  <div class="cifra cifra--destacada"><p class="cifra__etiqueta">Por cobrar en total</p><p class="cifra__valor">{{ por_cobrar|pesos }}</p><p class="cifra__nota">{{ total_fiado|pesos }} fiado, {{ total_abonado|pesos }} abonado</p></div>
+</div>
+
+<section class="tarjeta">
+  <div class="tarjeta__cabeza"><h2>Tiendas</h2><a href="{% url 'admin:libreta_tienda_changelist' %}">Ver en el panel de Django</a></div>
+  {% if tiendas %}
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead><tr><th>Tienda</th><th>Tendero</th><th class="ocultar-movil">Municipio</th><th class="derecha">Clientes</th><th class="derecha">Por cobrar</th><th class="ocultar-movil">Último fiado</th><th>Cuenta</th></tr></thead>
+      <tbody>
+      {% for fila in tiendas %}{% with t=fila.tienda %}
+        <tr>
+          <td><a class="fila-enlace" href="{% url 'admin:libreta_tienda_change' t.pk %}">{{ t.nombre }}</a><small>{{ t.direccion }}</small></td>
+          <td>{{ t.tendero.get_full_name|default:t.tendero.username }}<small>{{ t.tendero.username }}</small></td>
+          <td class="ocultar-movil">{{ t.municipio }}</td>
+          <td class="derecha">{{ t.n_clientes }}</td>
+          <td class="derecha monto">{{ fila.por_cobrar|pesos }}</td>
+          <td class="ocultar-movil">{{ t.ultimo_fiado|date:"j M Y"|default:"Sin fiados" }}</td>
+          <td>{% if t.tendero.is_active %}<span class="etiqueta etiqueta--ok">Activa</span>{% else %}<span class="etiqueta etiqueta--neutro">Desactivada</span>{% endif %}</td>
+        </tr>
+      {% endwith %}{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="vacio"><p class="vacio__nota">Todavía no hay tiendas</p><p>Cuando un tendero se registre, aparecerá aquí.</p></div>
+  {% endif %}
+</section>
+<p class="suave" style="font-size:.88rem">Como administrador puedes ver los fiados y abonos desde el panel de Django, pero no modificarlos: esa información es de cada tienda.</p>
+{% endblock %}

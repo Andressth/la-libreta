@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titulo %}Ingresar{% endblock %}
+{% block cuerpo %}
+<main class="pagina-papel">
+  <a href="{% url 'core:home' %}" class="marca">{% include "includes/logo.html" %}La Libreta</a>
+  <form method="post" class="hoja" novalidate>
+    {% csrf_token %}
+    <h1>Ingresar</h1>
+    <p class="hoja__sub">Para tenderos y administradores.</p>
+    {% include "includes/mensajes.html" %}
+    {% if form.non_field_errors %}<ul class="errores-form">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    {% include "includes/campo.html" with campo=form.username %}
+    {% include "includes/campo.html" with campo=form.password %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="boton boton--principal boton--ancho">Ingresar</button>
+    <p class="hoja__pie">¿Tienes una tienda y no tienes cuenta? <a href="{% url 'cuentas:registro' %}">Registra tu tienda</a></p>
+    <p class="hoja__pie">¿Eres cliente? No necesitas cuenta: <a href="{% url 'core:home' %}#consultar">consulta tu saldo con tu código</a>.</p>
+  </form>
+</main>
+{% endblock %}

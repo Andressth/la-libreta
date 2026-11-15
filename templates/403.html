@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titulo %}Sin permiso{% endblock %}
+{% block cuerpo %}
+<main class="pagina-papel">
+  <div class="hoja error-pagina">
+    <p class="vacio__nota">Esta página no es para tu usuario</p>
+    <p class="suave">{% if exception %}{{ exception }}{% else %}No tienes permiso para ver esta sección.{% endif %}</p>
+    <a href="{% if user.is_authenticated %}{% url 'cuentas:inicio_segun_rol' %}{% else %}{% url 'core:home' %}{% endif %}" class="boton boton--principal">Volver a mi inicio</a>
+  </div>
+</main>
+{% endblock %}

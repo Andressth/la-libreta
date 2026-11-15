@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block cuerpo %}
+{% with n=request.resolver_match.url_name %}
+<div class="app">
+  <div class="barra-movil">
+    <a href="{% url 'cuentas:inicio_segun_rol' %}" class="marca">{% include "includes/logo.html" %}La Libreta</a>
+    <button type="button" data-abrir-menu aria-controls="menu-lateral" aria-expanded="false">Menú</button>
+  </div>
+  <div class="velo" data-velo hidden></div>
+
+  <aside class="lateral" id="menu-lateral">
+    <a href="{% url 'cuentas:inicio_segun_rol' %}" class="marca">{% include "includes/logo.html" %}La Libreta</a>
+    {% if user.es_admin %}
+      <p class="lateral__duenio">Administración<small>{{ user.get_full_name|default:user.username }}</small></p>
+      <nav class="nav" aria-label="Menú del administrador">
+        <a href="{% url 'cuentas:estadisticas' %}" {% if n == 'estadisticas' %}aria-current="page"{% endif %}>{% include "includes/icono.html" with nombre="estadisticas" %}Estadísticas</a>
+        <a href="{% url 'admin:libreta_tienda_changelist' %}">{% include "includes/icono.html" with nombre="tienda" %}Gestionar tiendas</a>
+        <a href="{% url 'admin:cuentas_usuario_changelist' %}">{% include "includes/icono.html" with nombre="usuarios" %}Gestionar usuarios</a>
+        <a href="{% url 'admin:index' %}">{% include "includes/icono.html" with nombre="ajustes" %}Panel de Django</a>
+      </nav>
+    {% else %}
+      <p class="lateral__duenio">{{ user.tienda.nombre }}<small>{{ user.get_full_name|default:user.username }}, {{ user.tienda.municipio }}</small></p>
+      <nav class="nav" aria-label="Menú del tendero">
+        <a href="{% url 'libreta:panel' %}" {% if n == 'panel' %}aria-current="page"{% endif %}>{% include "includes/icono.html" with nombre="panel" %}Panel</a>
+        <a href="{% url 'libreta:clientes' %}" {% if 'cliente' in n %}aria-current="page"{% endif %}>{% include "includes/icono.html" with nombre="clientes" %}Clientes</a>
+        <a href="{% url 'libreta:productos' %}" {% if 'producto' in n %}aria-current="page"{% endif %}>{% include "includes/icono.html" with nombre="productos" %}Productos</a>
+        <a href="{% url 'libreta:fiados' %}" {% if 'fiado' in n %}aria-current="page"{% endif %}>{% include "includes/icono.html" with nombre="fiados" %}Fiados</a>
+        <a href="{% url 'libreta:abonos' %}" {% if 'abono' in n %}aria-current="page"{% endif %}>{% include "includes/icono.html" with nombre="abonos" %}Abonos</a>
+        <div class="nav__separador"></div>
+        <a href="{% url 'libreta:mi_tienda' %}" {% if n == 'mi_tienda' %}aria-current="page"{% endif %}>{% include "includes/icono.html" with nombre="tienda" %}Mi tienda</a>
+      </nav>
+    {% endif %}
+    <div class="lateral__pie">
+      <form method="post" action="{% url 'cuentas:salir' %}" class="nav">
+        {% csrf_token %}
+        <button type="submit">{% include "includes/icono.html" with nombre="salir" %}Cerrar sesión</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="principal">
+    {% include "includes/mensajes.html" %}
+    {% block contenido %}{% endblock %}
+  </main>
+</div>
+{% endwith %}
+{% endblock %}

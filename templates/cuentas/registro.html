@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Registrar mi tienda{% endblock %}
+{% block cuerpo %}
+<main class="pagina-papel">
+  <a href="{% url 'core:home' %}" class="marca">{% include "includes/logo.html" %}La Libreta</a>
+  <form method="post" class="hoja hoja--ancha" novalidate>
+    {% csrf_token %}
+    <h1>Registrar mi tienda</h1>
+    <p class="hoja__sub">En dos minutos tienes tu libreta lista para anotar fiados.</p>
+    {% if form.non_field_errors %}<ul class="errores-form">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    <fieldset>
+      <legend>Tus datos</legend>
+      <div class="rejilla-form">
+        {% include "includes/campo.html" with campo=form.first_name %}
+        {% include "includes/campo.html" with campo=form.last_name %}
+        {% include "includes/campo.html" with campo=form.email %}
+        {% include "includes/campo.html" with campo=form.username %}
+        {% include "includes/campo.html" with campo=form.password1 %}
+        {% include "includes/campo.html" with campo=form.password2 %}
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Tu tienda</legend>
+      <div class="rejilla-form">
+        {% include "includes/campo.html" with campo=form.nombre_tienda %}
+        {% include "includes/campo.html" with campo=form.telefono %}
+        {% include "includes/campo.html" with campo=form.direccion %}
+        {% include "includes/campo.html" with campo=form.municipio %}
+      </div>
+    </fieldset>
+    <button type="submit" class="boton boton--principal boton--ancho">Crear mi cuenta y mi tienda</button>
+    <p class="hoja__pie">¿Ya tienes cuenta? <a href="{% url 'cuentas:ingresar' %}">Ingresa aquí</a></p>
+  </form>
+</main>
+{% endblock %}
