@@ -127,3 +127,7 @@ la-libreta/
 ```
 
 Las fuentes Archivo y Caveat se incluyen en `static/fonts` bajo la licencia SIL Open Font License.
+
+## Video de demostración
+
+https://youtu.be/P_kM7Hq3XQY
