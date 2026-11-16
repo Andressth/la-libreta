@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block cuerpo %}
+<header class="encabezado">
+  <div class="contenedor encabezado__fila">
+    <a href="{% url 'core:home' %}" class="marca" aria-label="La Libreta, inicio">{% include "includes/logo.html" %}La Libreta</a>
+    <nav class="menu" aria-label="Menú principal">
+      <a href="{% url 'core:home' %}#como-funciona">Cómo funciona</a>
+      <a href="{% url 'core:home' %}#beneficios">Beneficios</a>
+      <a href="{% url 'core:home' %}#consultar">Consultar mi saldo</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'cuentas:inicio_segun_rol' %}" class="boton boton--principal">Ir a mi panel</a>
+      {% else %}
+        <a href="{% url 'cuentas:ingresar' %}" class="boton">Ingresar</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+<main>{% block contenido %}{% endblock %}</main>
+<footer class="pie">
+  <div class="contenedor pie__fila">
+    <p><strong>La Libreta</strong>. Proyecto de clase de Programación en la Web, UIS.</p>
+    <p>Jonathan Steven Torres Duarte y Gonzalo Andrés Tarazona Higuera</p>
+  </div>
+</footer>
+{% endblock %}

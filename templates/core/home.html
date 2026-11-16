@@ -1,0 +1,98 @@
+{% extends "base_publico.html" %}
+{% block titulo %}El cuaderno del fiado, ahora en el celular{% endblock %}
+{% block contenido %}
+<section class="hero">
+  <div class="contenedor hero__grid">
+    <div>
+      <h1>El cuaderno del fiado, ahora en el celular.</h1>
+      <p class="hero__bajada">
+        Anota lo que fías, registra los abonos y deja que el saldo de cada cliente se calcule solo.
+        Tu cliente puede ver lo que debe desde su celular, sin crear una cuenta.
+      </p>
+      <div class="hero__botones">
+        <a href="{% url 'cuentas:registro' %}" class="boton boton--principal">Registrar mi tienda</a>
+        <a href="#consultar" class="boton">Consultar lo que debo</a>
+      </div>
+      <p class="hero__nota">Gratis para tiendas de barrio y de pueblo.</p>
+    </div>
+
+    <figure class="libreta" aria-label="Ejemplo de una página del cuaderno de fiados">
+      <p class="libreta__titulo">Fiados de noviembre</p>
+      <ul class="libreta__lista">
+        <li><span>Carlos Pérez</span><span>$86.400</span></li>
+        <li><span>Marta Gómez</span><span>$73.200</span></li>
+        <li class="pagado"><span>Ana Suárez</span><em>pagó</em><span>$20.000</span></li>
+        <li class="pasado"><span>Don Luis</span><em>¡se pasó del límite!</em><span>$152.000</span></li>
+        <li><span>Jorge, el del taller</span><span>$61.000</span></li>
+      </ul>
+      <p class="libreta__total"><span>Total</span><span>$372.600</span></p>
+      <figcaption class="libreta__pie">Así se ve el cuaderno hoy. La Libreta hace estas cuentas por ti.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="seccion" id="como-funciona">
+  <div class="contenedor">
+    <h2>Cómo funciona</h2>
+    <ol class="pasos">
+      <li class="paso">
+        <h3>Registra a tus clientes</h3>
+        <p>Nombre, cédula, teléfono y hasta cuánto le fías a cada uno. Eso es todo lo que necesitas para empezar.</p>
+      </li>
+      <li class="paso">
+        <h3>Anota cada fiado y cada abono</h3>
+        <p>Escoge los productos o escribe un valor. La Libreta suma, resta y te avisa si alguien se pasa de su límite.</p>
+      </li>
+      <li class="paso">
+        <h3>Comparte la cuenta</h3>
+        <p>Cada cliente tiene un enlace y un código QR para ver su saldo. Si se atrasa, le mandas un recordatorio por WhatsApp.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="seccion seccion--gris" id="beneficios">
+  <div class="contenedor">
+    <h2>Para los dos lados del mostrador</h2>
+    <div class="lados">
+      <div class="lado">
+        <h3>Si tienes una tienda</h3>
+        <ul>
+          <li>Sabes cuánto te deben en total, sin sumar a mano.</li>
+          <li>Ves quién lleva más de un mes sin abonar.</li>
+          <li>No se pierde la hoja ni se borra lo que escribiste a lápiz.</li>
+          <li>Funciona en el celular que ya tienes.</li>
+        </ul>
+      </div>
+      <div class="lado">
+        <h3>Si te fían</h3>
+        <ul>
+          <li>Consultas tu saldo cuando quieras.</li>
+          <li>Ves cada fiado con su fecha y sus productos.</li>
+          <li>No descargas aplicaciones ni creas contraseñas.</li>
+          <li>Tienes claro cuánto abonaste y cuándo.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="seccion" id="consultar">
+  <div class="contenedor">
+    {% include "includes/mensajes.html" %}
+    <div class="consulta-caja" style="margin-top: 1rem">
+      <div>
+        <h2>¿Te fían en una tienda que usa La Libreta?</h2>
+        <p>Escribe el código que te compartió el tendero para ver tu saldo y tus movimientos.</p>
+      </div>
+      <form action="{% url 'libreta:consultar_codigo' %}" method="get">
+        <label for="codigo">Código de consulta</label>
+        <div class="consulta-fila">
+          <input type="text" id="codigo" name="codigo" placeholder="Ej: 8F3K2Q" maxlength="8" autocomplete="off" required>
+          <button type="submit" class="boton boton--principal">Consultar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
